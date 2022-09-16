@@ -80,7 +80,7 @@ function Tab() {
             <div className="p-5">
                 <form onSubmit={handleSubmit(onSubmit)} className="flex">
                     <div
-                        className="flex-1 flex flex-row bg-white/10 border-white/20 border rounded-md divide-x divide-white/20">
+                        className="flex-1 flex flex-row bg-white/10 border-white/20 border rounded-md divide-x divide-white/20 overflow-hidden">
                         <input {...register('projectId')} placeholder="Project Id"
                                className="bg-transparent font-mono text-sm px-4 h-10 outline-none autofill:!bg-red-500 appearance-none"/>
                         <input {...register('path')}
