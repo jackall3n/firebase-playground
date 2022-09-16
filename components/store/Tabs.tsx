@@ -1,46 +1,15 @@
-import { useState } from "react";
-import qs from "querystring";
 import classnames from "classnames";
 import { getQueryType } from "../../utils/getQueryType";
 import { PlusIcon } from "@heroicons/react/24/outline";
-import { useRouter } from "next/router";
+import { useTabs } from "../../providers/TabProvider";
 
 interface Props {}
 
-const TABS: Array<{ data: { projectId?: string; path?: string } }> = [
-  {
-    data: {},
-  },
-];
-
 export function Tabs({}: Props) {
-  const { push } = useRouter();
-  const [tabs, setTabs] = useState(TABS);
-  const [activeTab, setActiveTab] = useState(tabs.length - 1);
+  const { tabs, createTab, switchTab, active } = useTabs();
 
   function onNewTab() {
-    setTabs((tabs) => {
-      const updated = [...tabs, { data: {} } as any];
-
-      setTimeout(() => onSetTab(updated.length - 1), 1);
-
-      return updated;
-    });
-  }
-
-  async function onSetTab(index: number) {
-    setActiveTab(index);
-
-    const tab = tabs[index];
-
-    if (!tab) {
-      return;
-    }
-
-    const query = qs.stringify(tab.data);
-    const url = query ? `/store?${query}` : "/store";
-
-    await push(url);
+    createTab({ data: {} });
   }
 
   return (
@@ -48,17 +17,17 @@ export function Tabs({}: Props) {
       <div className="grid grid-flow-col">
         {tabs.map((tab, index) => {
           const type = getQueryType(tab.data.path);
-          const active = activeTab === index;
+          const isActive = active === index;
 
           return (
             <button
-              onClick={() => onSetTab(index)}
+              onClick={() => switchTab(index)}
               key={index}
               className={classnames(
                 "text-left w-40 text-xs text-white border-x -mb-px border-t-2 px-4 py-3 flex items-center hover:bg-black/20 transition-colors",
                 {
-                  "border-white/10 border-t-orange-400 bg-gray-800": active,
-                  "border-transparent text-white/50": !active,
+                  "border-white/10 border-t-orange-400 bg-gray-800": isActive,
+                  "border-transparent text-white/50": !isActive,
                 }
               )}
             >

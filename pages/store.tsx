@@ -1,18 +1,26 @@
 import type { NextPage } from "next";
 import { Formik, Form, Field } from "formik";
-import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { Query } from "../components/store/Query";
 import { Tabs } from "../components/store/Tabs";
 import { BoltIcon } from "@heroicons/react/24/outline";
+import { useTabs } from "../providers/TabProvider";
 
 function Tab() {
   const { push, query } = useRouter();
+  const { updateTab } = useTabs();
 
   const projectId = query.projectId as string;
   const path = query.path as string;
 
   async function onSubmit(values: { path: string; projectId: string }) {
+    updateTab({
+      data: {
+        path: values.path,
+        projectId: values.projectId,
+      },
+    });
+
     await push({
       query: {
         path: values.path,
@@ -28,8 +36,8 @@ function Tab() {
           onSubmit={onSubmit}
           enableReinitialize
           initialValues={{
-            path: query.path as string ?? '',
-            projectId: query.projectId as string ?? '',
+            path: (query.path as string) ?? "",
+            projectId: (query.projectId as string) ?? "",
           }}
         >
           <Form className="grid gap-2">
