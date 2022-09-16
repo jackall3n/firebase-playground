@@ -1,6 +1,6 @@
-export function getQueryType(path: string) {
+export function getQueryType(path?: string) {
   const segments =
-    (path as string)
+    path
       ?.split("/")
       .map((s) => s.trim())
       .filter(Boolean) ?? [];

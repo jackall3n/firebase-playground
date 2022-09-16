@@ -7,7 +7,7 @@ import { useRouter } from "next/router";
 
 interface Props {}
 
-const TABS = [
+const TABS: Array<{ data: { projectId?: string; path?: string } }> = [
   {
     data: {},
   },
