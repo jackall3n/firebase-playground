@@ -3,7 +3,7 @@ import Link from "next/link";
 
 const Home: NextPage = () => {
   return (
-    <div className="flex flex-col justify-center items-center flex-1">
+    <div className="flex flex-col justify-center items-center flex-1 p-5">
       <div>
         <div className="pb-10">
           <div className="font-medium font-mono">
