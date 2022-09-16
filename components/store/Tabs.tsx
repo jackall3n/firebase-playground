@@ -9,16 +9,7 @@ interface Props {}
 
 const TABS = [
   {
-    data: {
-      projectId: "zorp-co",
-      path: "users/jack",
-    },
-  },
-  {
-    data: {
-      projectId: "houstn-io",
-      path: "users",
-    },
+    data: {},
   },
 ];
 
@@ -72,7 +63,7 @@ export function Tabs({}: Props) {
               )}
             >
               <div className="text-xs font-semibold font-mono pr-3">
-                  {type === "NONE" && <span className="text-sky-500">NEW</span>}
+                {type === "NONE" && <span className="text-sky-500">NEW</span>}
                 {type === "COLLECTION" && (
                   <span className="text-green-500">COL</span>
                 )}
