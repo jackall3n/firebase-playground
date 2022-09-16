@@ -7,7 +7,7 @@ const Home: NextPage = () => {
             <div>
                 <div className="pb-10">
                     <div className="font-medium font-mono">
-                        <div className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-red-700 to-yellow-400">Firebase
+                        <div className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-red-500 to-yellow-400">Firebase
                         </div>
                         <span className="text-sm"> Playground</span>
                     </div>
