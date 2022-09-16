@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { Query } from "../components/store/Query";
+import { Tabs } from "../components/store/Tabs";
 
 function Tab() {
   const { push, query } = useRouter();
@@ -63,7 +64,8 @@ function Tab() {
 
 const Home: NextPage = () => {
   return (
-    <div className="flex flex-1 overflow-hidden">
+    <div className="flex flex-col flex-1 overflow-hidden">
+      <Tabs />
       <Tab />
     </div>
   );

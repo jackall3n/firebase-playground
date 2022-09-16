@@ -75,7 +75,7 @@ export function Collection({ path, store, projectId }: Props) {
   if (loading) {
     return (
       <div className="flex justify-center items-start flex-1">
-        <div className="text-sm px-3 py-1">Loading...</div>
+        <div className="text-sm px-3 py-1 text-center">Loading...</div>
       </div>
     );
   }
@@ -83,7 +83,7 @@ export function Collection({ path, store, projectId }: Props) {
   if (error) {
     return (
       <div className="flex justify-center items-start flex-1">
-        <div className="bg-red-700 text-black/60 rounded-lg text-sm font-semibold px-3 py-1">
+        <div className="bg-red-700 text-black/60 rounded-lg text-sm font-semibold px-3 py-1 text-center">
           {error.message}
         </div>
       </div>
