@@ -8,6 +8,7 @@ import {
 import qs from "querystring";
 import { useRouter } from "next/router";
 import { cloneDeep } from "lodash";
+import updateDb from "update-browserslist-db";
 
 export interface ITab {
   data: {
@@ -30,37 +31,57 @@ export interface ITabContext {
 export const TabContext = createContext<ITabContext>(undefined as never);
 export const useTabs = () => useContext(TabContext);
 
-export function TabProvider({ children }: PropsWithChildren<unknown>) {
-  const { push } = useRouter();
-  const [tabs, setTabs] = useState<ITab[]>([]);
+function useLocalStorage<T>(key: string, defaultValue: T) {
+  const [value, setValue] = useState<T>(defaultValue);
 
   useEffect(() => {
     try {
-      const value = window.localStorage.getItem("tabs");
+      const value = window.localStorage.getItem(key);
 
       if (!value) {
-        return;
+        return setValue(defaultValue);
       }
 
-      setTabs(JSON.parse(value));
+      const parsed = JSON.parse(value);
+
+      setValue(parsed ?? defaultValue);
     } catch (e) {}
   }, []);
 
-  const [active = 0, setActive] = useState<number>();
+  function update(fn: (value: T) => T) {
+    setValue((value) => {
+      const updated = cloneDeep(fn(value));
 
-  function updateTabs(tabs: ITab[]) {
-    localStorage.setItem("tabs", JSON.stringify(tabs));
-    setTabs(cloneDeep(tabs));
+      window.localStorage.setItem(key, JSON.stringify(updated));
+
+      return updated;
+    });
   }
 
-  function updateTab(tab: ITab) {
-    tabs[active] = cloneDeep(tab);
+  return [value, update] as const;
+}
 
-    updateTabs(tabs);
+export function TabProvider({ children }: PropsWithChildren<unknown>) {
+  const { push } = useRouter();
+  const [{ tabs, active }, setData] = useLocalStorage("data", {
+    tabs: [] as ITab[],
+    active: 0,
+  });
+
+  function updateTab(tab: ITab) {
+    setData((data) => {
+      data.tabs[active] = tab;
+
+      return data;
+    });
   }
 
   async function switchTab(index: number) {
-    setActive(index);
+    setData((data) => {
+      data.active = index;
+
+      return data;
+    });
 
     const tab = tabs[index];
 
@@ -76,8 +97,14 @@ export function TabProvider({ children }: PropsWithChildren<unknown>) {
 
   function createTab(tab: ITab) {
     const updated = [...tabs, tab];
-    updateTabs(updated);
-    setTimeout(() => switchTab(updated.length - 1));
+
+    setData((data) => {
+      data.tabs = [...tabs, tab];
+
+      return data;
+    });
+
+    setTimeout(() => switchTab(updated.length - 1), 1);
   }
 
   return (
