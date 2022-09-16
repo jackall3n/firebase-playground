@@ -5,6 +5,7 @@ import {collection, doc, Firestore, getFirestore, onSnapshot} from 'firebase/fir
 import {useEffect, useMemo, useState} from "react";
 import {flatten, orderBy, uniq} from 'lodash';
 import {useRouter} from "next/router";
+import Link from 'next/link';
 
 
 function useApp(projectId: string) {
@@ -55,9 +56,14 @@ function Tab() {
     const segments = (query.path as string)?.split('/').map(s => s.trim()).filter(Boolean) ?? [];
     const path = segments.join('/')
 
-    const {register, handleSubmit} = useForm<{ path: string, projectId: string }>({
-        defaultValues: query
+    const {register, handleSubmit, setValue} = useForm<{ path: string, projectId: string }>({
+        defaultValues: query,
     });
+
+    useEffect(() => {
+        setValue('projectId', projectId)
+        setValue('path', path)
+    }, [projectId, path])
 
     const app = useApp(projectId);
     const store = useStore(app);
@@ -93,13 +99,14 @@ function Tab() {
             </div>
 
             <div className="overflow-auto flex flex-1 pb-5 px-5">
-                {isCollection ? <Collection path={path} store={store}/> : <Document path={path} store={store}/>}
+                {isCollection ? <Collection path={path} store={store} projectId={projectId}/> :
+                    <Document path={path} store={store} projectId={projectId}/>}
             </div>
         </div>
     )
 }
 
-function Collection({path, store}: { path: string, store: Firestore | null }) {
+function Collection({path, store, projectId}: { path: string, projectId: string, store: Firestore | null }) {
     const [data, setData] = useState<any[]>([]);
 
     useEffect(() => {
@@ -155,10 +162,13 @@ function Collection({path, store}: { path: string, store: Firestore | null }) {
                     {data.map(document => {
                         const data = document.data();
 
+
                         return (
                             <tr key={document.id} className="font-mono font-light text-xs">
-                                <td className="pb-1">
-                                    <Content value={document.id}/>
+                                <td className="pb-1 pr-1">
+                                    <ContentLink projectId={projectId}
+                                                 path={`${document.ref.parent.path}/${document.id}`}
+                                                 value={document.id}/>
                                 </td>
 
                                 {headers.map(header => {
@@ -167,7 +177,7 @@ function Collection({path, store}: { path: string, store: Firestore | null }) {
                                     return (
                                         <td key={header} className="max-w-xl pb-1 pr-1">
                                             <div className="overflow-hidden text-ellipsis whitespace-nowrap">
-                                                <Content value={value}/>
+                                                <Content value={value} projectId={projectId}/>
                                             </div>
                                         </td>
                                     )
@@ -183,7 +193,7 @@ function Collection({path, store}: { path: string, store: Firestore | null }) {
     )
 }
 
-function Document({path, store}: { path: string, store: Firestore | null }) {
+function Document({path, store, projectId}: { path: string, projectId: string, store: Firestore | null }) {
     const [data, setData] = useState<any>();
 
     useEffect(() => {
@@ -204,8 +214,8 @@ function Document({path, store}: { path: string, store: Firestore | null }) {
     }, [path, store]);
 
     return (
-        <div className="flex flex-1 flex-col">
-            <div className="overflow-x-auto font-mono text-sm">
+        <div className="flex flex-1 flex-col overflow-auto">
+            <div className="overflow-auto font-mono text-sm">
                 <pre>
                     <code>
                         {JSON.stringify(data, null, 2)}
@@ -216,7 +226,7 @@ function Document({path, store}: { path: string, store: Firestore | null }) {
     )
 }
 
-function Content({value}: { value: any }) {
+function Content({value, projectId}: { value: any, projectId: string }) {
     const isArray = Array.isArray(value);
     const isObject = typeof value === 'object';
 
@@ -237,13 +247,9 @@ function Content({value}: { value: any }) {
 
         if (value?.firestore?.type === 'firestore') {
             return (
-                <div className="bg-white/5 rounded-md px-2 py-1">
-                    {value.path}
-                </div>
+                <ContentLink projectId={projectId} path={value?.path} value={value?.path}/>
             )
         }
-
-        console.log({value})
 
         return (
             <div
@@ -277,11 +283,20 @@ function Content({value}: { value: any }) {
                 className="max-w-sm px-2 py-1 text-right text-ellipsis overflow-hidden whitespace-nowrap">{String(value)}</div>
         )
     }
+    if (typeof value === 'boolean') {
+        return (
+            <div className="flex justify-end">
+                <div className="bg-white/5 font-mono rounded-md px-2 py-1">
+                    {String(value)}
+                </div>
+            </div>
+        )
+    }
 
     if (value === null) {
         return (
             <div
-                className="max-w-sm px-2 py-1 text-ellipsis overflow-hidden whitespace-nowrap">
+                className=" max-w-sm px-2 py-1 text-ellipsis overflow-hidden whitespace-nowrap">
                 null
             </div>
         )
@@ -289,16 +304,37 @@ function Content({value}: { value: any }) {
 
     if (value === undefined) {
         return (
-            <div className="px-2 py-1 text-white/20">
+            <div className=" px-2 py-1 text-white/
+                20">
                 -
             </div>
         )
     }
 
+    console.log({value})
+
     return (
         <div className="">
             ?
         </div>
+    )
+}
+
+function ContentLink({projectId, path, value}: { projectId: string, path?: string, value?: string }) {
+    return (
+        <Link href={{
+            href: '/store',
+            query: {
+                projectId,
+                path
+            }
+        }}>
+            <a target="_blank"
+               className="block max-w-sm underline bg-white/5 rounded-md px-2 py-1 text-ellipsis overflow-hidden whitespace-nowrap">{
+                value
+            }</a>
+
+        </Link>
     )
 }
 
