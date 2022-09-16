@@ -1,31 +1,18 @@
-import { useEffect, useMemo, useState } from "react";
-import {
-  FirebaseApp,
-  FirebaseError,
-  getApps,
-  initializeApp,
-} from "firebase/app";
-import {
-  collection,
-  Firestore,
-  getFirestore,
-  onSnapshot,
-} from "firebase/firestore";
-import { flatten, orderBy, uniq } from "lodash";
-import { ContentLink } from "./content/ContentLink";
-import { Content } from "./content/Content";
+import { useState } from "react";
+import qs from "querystring";
 import classnames from "classnames";
 import { getQueryType } from "../../utils/getQueryType";
+import { PlusIcon } from "@heroicons/react/24/outline";
+import { useRouter } from "next/router";
 
 interface Props {}
 
-const tabs = [
+const TABS = [
   {
     data: {
       projectId: "zorp-co",
       path: "users/jack",
     },
-    active: true,
   },
   {
     data: {
@@ -36,24 +23,56 @@ const tabs = [
 ];
 
 export function Tabs({}: Props) {
+  const { push } = useRouter();
+  const [tabs, setTabs] = useState(TABS);
+  const [activeTab, setActiveTab] = useState(tabs.length - 1);
+
+  function onNewTab() {
+    setTabs((tabs) => {
+      const updated = [...tabs, { data: {} } as any];
+
+      setTimeout(() => onSetTab(updated.length - 1), 1);
+
+      return updated;
+    });
+  }
+
+  async function onSetTab(index: number) {
+    setActiveTab(index);
+
+    const tab = tabs[index];
+
+    if (!tab) {
+      return;
+    }
+
+    const query = qs.stringify(tab.data);
+    const url = query ? `/store?${query}` : "/store";
+
+    await push(url);
+  }
+
   return (
     <div className="bg-black/10 border-b border-white/10 flex">
       <div className="grid grid-flow-col">
         {tabs.map((tab, index) => {
           const type = getQueryType(tab.data.path);
+          const active = activeTab === index;
 
           return (
             <button
+              onClick={() => onSetTab(index)}
               key={index}
               className={classnames(
                 "text-left w-40 text-xs text-white border-x -mb-px border-t-2 px-4 py-3 flex items-center hover:bg-black/20 transition-colors",
                 {
-                  "border-white/10 border-t-orange-400 bg-gray-800": tab.active,
-                  "border-transparent text-white/50": !tab.active,
+                  "border-white/10 border-t-orange-400 bg-gray-800": active,
+                  "border-transparent text-white/50": !active,
                 }
               )}
             >
               <div className="text-xs font-semibold font-mono pr-3">
+                  {type === "NONE" && <span className="text-sky-500">NEW</span>}
                 {type === "COLLECTION" && (
                   <span className="text-green-500">COL</span>
                 )}
@@ -73,6 +92,13 @@ export function Tabs({}: Props) {
           );
         })}
       </div>
+
+      <button
+        className="m-2 transition-colors hover:bg-white/10 rounded-md aspect-square flex items-center justify-center"
+        onClick={onNewTab}
+      >
+        <PlusIcon className="w-6 h-6 m-2 text-white" />
+      </button>
     </div>
   );
 }

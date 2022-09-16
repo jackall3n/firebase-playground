@@ -1,11 +1,15 @@
 export function getQueryType(path: string) {
-    const segments =
-        (path as string)
-            ?.split("/")
-            .map((s) => s.trim())
-            .filter(Boolean) ?? [];
+  const segments =
+    (path as string)
+      ?.split("/")
+      .map((s) => s.trim())
+      .filter(Boolean) ?? [];
 
-    const isCollection = segments.length % 2 !== 0;
+  if (segments.length === 0) {
+    return "NONE";
+  }
 
-    return (isCollection ? 'COLLECTION' : 'DOCUMENT')
+  const isCollection = segments.length % 2 !== 0;
+
+  return isCollection ? "COLLECTION" : "DOCUMENT";
 }

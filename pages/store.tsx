@@ -36,7 +36,7 @@ function Tab() {
     <div className="flex flex-col flex-1 overflow-hidden">
       <div className="p-5">
         <form onSubmit={handleSubmit(onSubmit)} className="flex">
-          <div className="flex-1 flex flex-row bg-white/10 border-white/20 border rounded-md divide-x divide-white/20 overflow-hidden">
+          <div className="flex-1 flex flex-row bg-white/5 border-white/20 border rounded-md divide-x divide-white/20 overflow-hidden">
             <input
               {...register("projectId")}
               placeholder="Enter a Project Id"
